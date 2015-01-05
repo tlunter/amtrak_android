@@ -5,36 +5,52 @@ import android.graphics.Color;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Created by toddlunter on 12/12/14.
  */
 public class TrainListing implements TrainDrawer {
+    public static final String PREFS_NAME = "TrainListing";
+
     private String LOG_TEXT = "com.tlunter.amtrak.TrainListing";
     private Context context;
     private ViewGroup view;
+    private Preferences preferences;
+    private List<Train> trains;
 
-    public TrainListing(Context context, ViewGroup view) {
+    public TrainListing(Context context, ViewGroup view, Preferences preferences) {
         this.context = context;
         this.view = new ScrollView(context);
+        this.preferences = preferences;
         view.addView(this.view);
     }
 
+    public void setPreferences(Preferences preferences) {
+        this.preferences = preferences;
+    }
+
     public void drawTrains(List<Train> trains) {
-        view.removeAllViews();
-        int train = findPreferredTrain(trains);
-        if (train > -1) {
-            drawPreferredTrainListing(trains, train);
-        } else {
-            drawAllTrains(trains);
-            Log.d(LOG_TEXT, "No preferred train found");
+        this.trains = trains;
+        redraw();
+    }
+
+    public void redraw() {
+        if (this.trains != null) {
+            view.removeAllViews();
+            int train = findPreferredTrain(trains);
+            if (train > -1) {
+                drawPreferredTrainListing(trains, train);
+            } else {
+                drawAllTrains(trains);
+                Log.d(LOG_TEXT, "No preferred train found");
+            }
         }
     }
 
@@ -61,18 +77,44 @@ public class TrainListing implements TrainDrawer {
         table.setGravity(Gravity.CENTER);
         table.setLayoutParams(layout);
         try {
-            TableRow prev = buildTableRow(trains.get(train - 1), 100);
-            table.addView(prev);
-        } catch (IndexOutOfBoundsException e) {
+            int previousTrainCount = 0;
+            int alpha = 145;
+            ListIterator<Train> prevTrains = trains.listIterator(train - 1);
+            while (prevTrains.hasPrevious()) {
+                Train previousTrain = prevTrains.previous();
+                Log.d(LOG_TEXT, "Previous Train: " + previousTrain.getNumber().toString() + " Acela? " + previousTrain.getAcela().toString());
+                if (!previousTrain.acela || (previousTrain.acela && !preferences.getHideAcela())) {
+                    TableRow prev = buildTableRow(previousTrain, alpha);
+                    table.addView(prev, 0);
+                    previousTrainCount++;
+                    alpha -= 45;
+                    if (previousTrainCount > 1)
+                        break;
+                }
+            }
+        } catch (IndexOutOfBoundsException ex) {
             Log.d(LOG_TEXT, "No previous train");
         }
         TableRow preferred = buildTableRow(trains.get(train), 255);
         table.addView(preferred);
         try {
-            TableRow next = buildTableRow(trains.get(train + 1), 100);
-            table.addView(next);
-        } catch (IndexOutOfBoundsException e) {
-            Log.d(LOG_TEXT, "No previous train");
+            int nextTrainCount = 0;
+            int alpha = 145;
+            ListIterator<Train> nextTrains = trains.listIterator(train + 1);
+            while (nextTrains.hasNext()) {
+                Train nextTrain = nextTrains.next();
+                Log.d(LOG_TEXT, "Next Train: " + nextTrain.getNumber().toString() + " Acela? " + nextTrain.getAcela().toString());
+                if (!nextTrain.acela || (nextTrain.acela && !preferences.getHideAcela())) {
+                    TableRow next = buildTableRow(nextTrain, alpha);
+                    table.addView(next);
+                    nextTrainCount++;
+                    alpha -= 45;
+                    if (nextTrainCount > 1)
+                        break;
+                }
+            }
+        } catch (IndexOutOfBoundsException ex) {
+            Log.d(LOG_TEXT, "No next train");
         }
         view.addView(table);
     }
@@ -120,7 +162,7 @@ public class TrainListing implements TrainDrawer {
     }
 
     private int findPreferredTrain(List<Train> trains) {
-        Train preferredTrain = new Train(0);
-        return trains.indexOf(preferredTrain);
+        Train train = new Train(this.preferences.getPreferredTrain());
+        return trains.indexOf(train);
     }
 }

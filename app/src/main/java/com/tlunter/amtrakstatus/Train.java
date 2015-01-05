@@ -7,15 +7,17 @@ public class Train {
     public Integer number;
     public String scheduled;
     public String estimated;
+    public Boolean acela;
 
     public Train(Integer number) {
         this.number = number;
     }
 
-    public Train(Integer number, String scheduled, String estimated) {
+    public Train(Integer number, String scheduled, String estimated, Boolean acela) {
         this.number = number;
         this.scheduled = scheduled;
         this.estimated = estimated;
+        this.acela = acela;
     }
 
     public Integer getNumber() {
@@ -41,6 +43,10 @@ public class Train {
     public void setEstimated(String estimated) {
         this.estimated = estimated;
     }
+
+    public Boolean getAcela() { return acela; }
+
+    public void setAcela(Boolean acela) { this.acela = acela; }
 
     @Override
     public boolean equals(Object o) {

@@ -9,20 +9,19 @@ import java.util.concurrent.TimeUnit;
  * Created by toddlunter on 12/15/14.
  */
 public class DataReloadService {
-    private final String LOG_TEXT = "com.tlxunter.amtrak.DataReloadService";
-    String from, to;
+    private final String LOG_TEXT = "com.tlunter.amtrak.DataReloadService";
+    Preferences preferences;
     TrainDrawer callback;
     ScheduledThreadPoolExecutor executor;
 
-    public DataReloadService(String from, String to, TrainDrawer callback) {
-        this.from = from;
-        this.to = to;
+    public DataReloadService(Preferences preferences, TrainDrawer callback) {
+        this.preferences = preferences;
         this.callback = callback;
     }
 
     public void start() {
         executor = new ScheduledThreadPoolExecutor(1);
-        executor.scheduleAtFixedRate(new FetchJsonRunnable(from, to, callback), 0, 60, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(new FetchJsonRunnable(preferences.getFrom(), preferences.getTo(), callback), 0, 60, TimeUnit.SECONDS);
     }
 
     public void end() {

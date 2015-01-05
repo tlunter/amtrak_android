@@ -63,7 +63,8 @@ public class FetchJson extends AsyncTask<String, Void, List<Train>> {
                 JSONObject arrival = jsonTrain.getJSONObject("departure");
                 String scheduled = arrival.getString("scheduled_time");
                 String estimated = arrival.getString("estimated_time");
-                Train train = new Train(number, scheduled, estimated);
+                Boolean acela = number.toString().length() > 3 && number.toString().startsWith("2");
+                Train train = new Train(number, scheduled, estimated, acela);
                 trains.add(train);
             }
             return trains;

@@ -4,9 +4,11 @@ import android.app.ActionBar;
 import android.app.ActivityGroup;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,6 +48,7 @@ public class StatusDisplay extends ActionBarActivity {
     private LinearLayout linearLayout;
     private TrainListing trainListing;
     private DataReloadService reloadService;
+    private Preferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +57,32 @@ public class StatusDisplay extends ActionBarActivity {
         setContentView(linearLayout);
 
         if (testConnectivity()) {
-            trainListing = new TrainListing(this, linearLayout);
-            if (reloadService == null) {
-                Log.d(LOG_TEXT, "Making a new reload service");
-                reloadService = new DataReloadService("pvd", "bby", trainListing);
-                reloadService.start();
-            }
+            reloadTrains();
         }
+    }
+
+    private void reloadTrains() {
+        if (preferences == null)
+            preferences = new Preferences(this);
+
+        preferences.reload();
+
+        if (preferences.getFrom() == null || preferences.getTo() == null)
+            return;
+
+        if (trainListing == null) {
+            trainListing = new TrainListing(this, linearLayout, preferences);
+        } else {
+            trainListing.redraw();
+        }
+
+        if (reloadService != null) {
+            reloadService.end();
+        }
+
+        Log.d(LOG_TEXT, "Making a new reload service");
+        reloadService = new DataReloadService(preferences, trainListing);
+        reloadService.start();
     }
 
     private void setupLinearLayout() {
@@ -113,5 +135,14 @@ public class StatusDisplay extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (testConnectivity()) {
+            reloadTrains();
+        }
     }
 }
