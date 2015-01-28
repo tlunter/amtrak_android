@@ -1,4 +1,4 @@
-package com.tlunter.amtrakstatus;
+package com.tlunter.amtrak;
 
 import java.util.List;
 

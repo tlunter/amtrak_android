@@ -1,4 +1,4 @@
-package com.tlunter.amtrakstatus;
+package com.tlunter.amtrak;
 
 /**
  * Created by toddlunter on 12/11/14.

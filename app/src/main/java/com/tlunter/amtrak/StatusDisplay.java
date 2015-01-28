@@ -1,49 +1,25 @@
-package com.tlunter.amtrakstatus;
+package com.tlunter.amtrak;
 
-import android.app.ActionBar;
-import android.app.ActivityGroup;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Size;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
 
-public class StatusDisplay extends ActionBarActivity {
+public class StatusDisplay extends ActionBarActivity implements
+        TrainListingFragment.OnTrainListingInteractionListener,
+        NetworkConnectivityFragment.OnNetworkConnectivityInteractionListener {
     private final String LOG_TEXT = "com.tlunter.amtrak.StatusDisplay";
     private LinearLayout linearLayout;
     private TrainListing trainListing;
@@ -55,13 +31,10 @@ public class StatusDisplay extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setupLinearLayout();
         setContentView(linearLayout);
-
-        if (testConnectivity()) {
-            reloadTrains();
-        }
     }
 
     private void reloadTrains() {
+        /*
         if (preferences == null)
             preferences = new Preferences(this);
 
@@ -76,13 +49,14 @@ public class StatusDisplay extends ActionBarActivity {
             trainListing.redraw();
         }
 
-        if (reloadService != null) {
+        if (reloadService != null && reloadService.isRunning()) {
             reloadService.end();
         }
 
         Log.d(LOG_TEXT, "Making a new reload service");
         reloadService = new DataReloadService(preferences, trainListing);
         reloadService.start();
+        */
     }
 
     private void setupLinearLayout() {
@@ -101,13 +75,16 @@ public class StatusDisplay extends ActionBarActivity {
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (null == networkInfo) {
-//            status.setText("Network Info NULL");
+            Log.d(LOG_TEXT, "Load NetworkConnectivityFragment");
+            loadNetworkConnectivityFragment();
             return false;
         } else if (!networkInfo.isConnected()) {
-//            status.setText("Cannot connect to Internet!");
+            Log.d(LOG_TEXT, "Load NetworkConnectivityFragment");
+            loadNetworkConnectivityFragment();
             return false;
         } else {
-//            status.setText(":) Let's go");
+            Log.d(LOG_TEXT, "Load TrainListingFragment");
+            loadTrainListingFragment();
             return true;
         }
     }
@@ -128,8 +105,8 @@ public class StatusDisplay extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Log.d(LOG_TEXT, "Settings clicked");
-            Intent intent = new Intent(this, Settings.class);
+            Log.d(LOG_TEXT, "Route settings clicked");
+            Intent intent = new Intent(this, RouteSettingsActivity.class);
             startActivity(intent);
             return true;
         }
@@ -138,11 +115,44 @@ public class StatusDisplay extends ActionBarActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        Log.d(LOG_TEXT, "Pausing reload");
+
+        if (reloadService != null && reloadService.isRunning()) {
+            reloadService.end();
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
-        if (testConnectivity()) {
-            reloadTrains();
-        }
+        Log.d(LOG_TEXT, "Resuming reload");
+
+        testConnectivity();
     }
+
+    private void loadNetworkConnectivityFragment() {
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        NetworkConnectivityFragment fragment = NetworkConnectivityFragment.newInstance();
+        ft.replace(android.R.id.content, fragment);
+        ft.commit();
+    }
+
+    private void loadTrainListingFragment() {
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        TrainListingFragment fragment = TrainListingFragment.newInstance();
+        ft.replace(android.R.id.content, fragment);
+        ft.commit();
+    }
+
+    public void onNetworkConnectivityInteraction() {
+        testConnectivity();
+    }
+
+    public void onTrainListingInteraction(Uri uri) {}
 }

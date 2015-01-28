@@ -1,4 +1,4 @@
-package com.tlunter.amtrakstatus;
+package com.tlunter.amtrak;
 
 import android.util.Log;
 
@@ -26,6 +26,14 @@ public class DataReloadService {
 
     public void end() {
         executor.shutdownNow();
+    }
+
+    public boolean isRunning() {
+        if (executor != null) {
+            return !(executor.isTerminated() || executor.isTerminated() || executor.isShutdown());
+        } else {
+            return false;
+        }
     }
 
     private class FetchJsonRunnable implements Runnable {

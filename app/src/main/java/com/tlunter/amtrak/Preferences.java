@@ -1,4 +1,4 @@
-package com.tlunter.amtrakstatus;
+package com.tlunter.amtrak;
 
 import android.content.Context;
 import android.content.SharedPreferences;
