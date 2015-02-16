@@ -1,4 +1,4 @@
-package com.tlunter.amtrakstatus;
+package com.tlunter.amtrak;
 
 import android.util.Log;
 
@@ -9,23 +9,31 @@ import java.util.concurrent.TimeUnit;
  * Created by toddlunter on 12/15/14.
  */
 public class DataReloadService {
-    private final String LOG_TEXT = "com.tlunter.amtrak.DataReloadService";
-    Preferences preferences;
+    private final String LOG_TEXT = "DataReloadService";
+    RouteSettings preferences;
     TrainDrawer callback;
     ScheduledThreadPoolExecutor executor;
 
-    public DataReloadService(Preferences preferences, TrainDrawer callback) {
-        this.preferences = preferences;
+    public DataReloadService(RouteSettings routeSettings, TrainDrawer callback) {
+        this.preferences = routeSettings;
         this.callback = callback;
     }
 
     public void start() {
         executor = new ScheduledThreadPoolExecutor(1);
-        executor.scheduleAtFixedRate(new FetchJsonRunnable(preferences.getFrom(), preferences.getTo(), callback), 0, 60, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(new FetchJsonRunnable(preferences.fromStation, preferences.toStation, callback), 0, 30, TimeUnit.SECONDS);
     }
 
     public void end() {
         executor.shutdownNow();
+    }
+
+    public boolean isRunning() {
+        if (executor != null) {
+            return !(executor.isTerminated() || executor.isTerminated() || executor.isShutdown());
+        } else {
+            return false;
+        }
     }
 
     private class FetchJsonRunnable implements Runnable {
