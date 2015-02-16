@@ -9,6 +9,7 @@ import android.util.Log;
  * Created by toddlunter on 1/22/15.
  */
 public class RouteSettingsOnChangeListener implements Preference.OnPreferenceChangeListener {
+    private final String LOG_TEXT = "PrefsFragment";
     RouteSettings rs;
     RouteSettingsOnChangeListener(RouteSettings rs) {
         this.rs = rs;
@@ -16,12 +17,13 @@ public class RouteSettingsOnChangeListener implements Preference.OnPreferenceCha
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        Log.d("com.tlunter.amtrak.PrefsFragment", "Preference " + preference.toString());
-        Log.d("com.tlunter.amtrak.PrefsFragment", "New object value: " + newValue.toString());
+        Log.d(LOG_TEXT, "Preference " + preference.toString());
+        Log.d(LOG_TEXT, "Key: " + preference.getKey().toString());
+        Log.d(LOG_TEXT, "New object value: " + newValue.toString());
         if (this.rs.getId() != null) {
-            Log.d("com.tlunter.amtrak.PrefsFragment", "Current id: " + this.rs.getId().toString());
+            Log.d(LOG_TEXT, "Current id: " + this.rs.getId().toString());
         } else {
-            Log.d("com.tlunter.amtrak.PrefsFragment", "New Record");
+            Log.d(LOG_TEXT, "New Record");
         }
 
         rs.setSettings(preference.getKey(), newValue);

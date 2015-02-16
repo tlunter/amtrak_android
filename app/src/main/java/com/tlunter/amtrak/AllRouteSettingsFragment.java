@@ -24,7 +24,7 @@ import java.util.List;
  * Created by toddlunter on 1/22/15.
  */
 public class AllRouteSettingsFragment extends AbstractRouteSettingsFragment {
-    private final String LOG_TEXT = "com.tlunter.amtrak.RouteSettingsFragment";
+    private final String LOG_TEXT = "AllRouteSettings";
 
     @Override
     public void onResume() {
@@ -35,9 +35,9 @@ public class AllRouteSettingsFragment extends AbstractRouteSettingsFragment {
         mainPreferenceScreen.removeAll();
 
         List<RouteSettings> routeSettings = RouteSettings.listAll(RouteSettings.class);
-        Log.d("com.tlunter.amtrak.RouteSettings", "Route settings: ");
+        Log.d(LOG_TEXT, "Route settings: ");
         for (RouteSettings rs : routeSettings) {
-            Log.d("com.tlunter.amtrak.RouteSettings", "Adding RouteSettings ID: " + rs.getId().toString());
+            Log.d(LOG_TEXT, "Adding RouteSettings ID: " + rs.getId().toString());
             PreferenceScreen routeSettingsPS = this.createPreferenceScreen(
                     rs.toString()
             );

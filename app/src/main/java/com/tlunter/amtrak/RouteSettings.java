@@ -26,13 +26,13 @@ public class RouteSettings extends SugarRecord<RouteSettings> {
     public String toString() {
         StringBuilder str = new StringBuilder();
         if (fromStation != null) {
-            str.append(fromStation.toString());
+            str.append(fromStation.toUpperCase().toString());
         } else {
             str.append("Not set");
         }
         str.append(" - ");
         if (toStation != null) {
-            str.append(toStation.toString());
+            str.append(toStation.toUpperCase().toString());
         } else {
             str.append("Not set");
         }
@@ -41,7 +41,7 @@ public class RouteSettings extends SugarRecord<RouteSettings> {
         }
         if (hideAcela != null) {
             if (hideAcela) {
-                str.append(" - hidden Acela");
+                str.append(" - Hidden Acela");
             }
         }
         return str.toString();
@@ -62,8 +62,8 @@ public class RouteSettings extends SugarRecord<RouteSettings> {
                 hideAcela = (Boolean)newValue;
                 break;
             default:
-                Log.d("com.tlunter.amtrak.RouteSettings", "Trying to set " + key + " to value " + newValue.toString());
-                Log.d("com.tlunter.amtrak.RouteSettings", "Don't know that key");
+                Log.d("RouteSettings", "Trying to set " + key + " to value " + newValue.toString());
+                Log.d("RouteSettings", "Don't know that key");
         }
     }
 }

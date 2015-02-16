@@ -1,12 +1,12 @@
 package com.tlunter.amtrak;
 
+import android.app.ActionBar;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
+import android.support.v13.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,77 +16,23 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import java.util.List;
 
-public class StatusDisplay extends ActionBarActivity implements
-        TrainListingFragment.OnTrainListingInteractionListener,
-        NetworkConnectivityFragment.OnNetworkConnectivityInteractionListener {
+
+public class StatusDisplay extends ActionBarActivity implements ConnectivityTest.ConnectivityTestInterface {
     private final String LOG_TEXT = "com.tlunter.amtrak.StatusDisplay";
-    private LinearLayout linearLayout;
-    private TrainListing trainListing;
-    private DataReloadService reloadService;
-    private Preferences preferences;
+    private ViewPager mViewPager;
+    private TrainPagerFragment mTrainPagerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLinearLayout();
-        setContentView(linearLayout);
-    }
 
-    private void reloadTrains() {
-        /*
-        if (preferences == null)
-            preferences = new Preferences(this);
+        setContentView(R.layout.activity_status_display);
 
-        preferences.reload();
-
-        if (preferences.getFrom() == null || preferences.getTo() == null)
-            return;
-
-        if (trainListing == null) {
-            trainListing = new TrainListing(this, linearLayout, preferences);
-        } else {
-            trainListing.redraw();
-        }
-
-        if (reloadService != null && reloadService.isRunning()) {
-            reloadService.end();
-        }
-
-        Log.d(LOG_TEXT, "Making a new reload service");
-        reloadService = new DataReloadService(preferences, trainListing);
-        reloadService.start();
-        */
-    }
-
-    private void setupLinearLayout() {
-        linearLayout = new LinearLayout(this);
-        ViewGroup.LayoutParams layout = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-        linearLayout.setLayoutParams(layout);
-        linearLayout.setGravity(Gravity.CENTER);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-    }
-
-    private boolean testConnectivity() {
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (null == networkInfo) {
-            Log.d(LOG_TEXT, "Load NetworkConnectivityFragment");
-            loadNetworkConnectivityFragment();
-            return false;
-        } else if (!networkInfo.isConnected()) {
-            Log.d(LOG_TEXT, "Load NetworkConnectivityFragment");
-            loadNetworkConnectivityFragment();
-            return false;
-        } else {
-            Log.d(LOG_TEXT, "Load TrainListingFragment");
-            loadTrainListingFragment();
-            return true;
-        }
+        mTrainPagerFragment = new TrainPagerFragment(getFragmentManager());
+        mViewPager = (ViewPager)findViewById(R.id.pager);
+        mViewPager.setAdapter(mTrainPagerFragment);
     }
 
     @Override
@@ -105,8 +51,16 @@ public class StatusDisplay extends ActionBarActivity implements
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Log.d(LOG_TEXT, "Route settings clicked");
-            Intent intent = new Intent(this, RouteSettingsActivity.class);
+            if (mViewPager.getCurrentItem() > -1) {
+                Intent intent = new Intent(this, EditRouteSettingsActivity.class);
+                Long routeSettingsId = RouteSettings.listAll(RouteSettings.class).get(mViewPager.getCurrentItem()).getId();
+                intent.putExtra("routeSettings", routeSettingsId);
+                startActivity(intent);
+                return true;
+            }
+        } else if (id == R.id.action_add_route_settings) {
+            Intent intent = new Intent(this, EditRouteSettingsActivity.class);
+            intent.putExtras(new Bundle());
             startActivity(intent);
             return true;
         }
@@ -115,44 +69,46 @@ public class StatusDisplay extends ActionBarActivity implements
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
-        Log.d(LOG_TEXT, "Pausing reload");
-
-        if (reloadService != null && reloadService.isRunning()) {
-            reloadService.end();
-        }
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
 
-        Log.d(LOG_TEXT, "Resuming reload");
+        mTrainPagerFragment.notifyDataSetChanged();
 
-        testConnectivity();
+        ConnectivityTest.test(this, this);
     }
 
-    private void loadNetworkConnectivityFragment() {
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        NetworkConnectivityFragment fragment = NetworkConnectivityFragment.newInstance();
-        ft.replace(android.R.id.content, fragment);
-        ft.commit();
+    public void testSuccess() {}
+
+    public void testFailure() {
+        Intent intent = new Intent(this, NetworkConnectivity.class);
+        startActivity(intent);
+        finish();
     }
 
-    private void loadTrainListingFragment() {
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        TrainListingFragment fragment = TrainListingFragment.newInstance();
-        ft.replace(android.R.id.content, fragment);
-        ft.commit();
-    }
+    public class TrainPagerFragment extends FragmentStatePagerAdapter {
+        public TrainPagerFragment(FragmentManager fm) {
+            super(fm);
+        }
 
-    public void onNetworkConnectivityInteraction() {
-        testConnectivity();
-    }
+        @Override
+        public Fragment getItem(int position) {
+            List<RouteSettings> rss = RouteSettings.listAll(RouteSettings.class);
 
-    public void onTrainListingInteraction(Uri uri) {}
+            return TrainListingFragment.newInstance(rss.get(position));
+        }
+
+        @Override
+        public int getCount() {
+            return (int)RouteSettings.count(RouteSettings.class, null, null);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            List<RouteSettings> rss = RouteSettings.listAll(RouteSettings.class);
+
+            RouteSettings rs = rss.get(position);
+
+            return rs.toString();
+        }
+    }
 }

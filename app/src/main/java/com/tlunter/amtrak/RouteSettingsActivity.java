@@ -14,7 +14,7 @@ import android.widget.LinearLayout;
  * Created by toddlunter on 12/30/14.
  */
 public class RouteSettingsActivity extends ActionBarActivity {
-    private final String LOG_TEXT = "com.tlunter.amtrak.TrainsSettings";
+    private final String LOG_TEXT = "TrainsSettings";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +28,6 @@ public class RouteSettingsActivity extends ActionBarActivity {
     private void resetFragment() {
         FragmentManager mFragmentManager = getFragmentManager();
 
-        Log.d(LOG_TEXT, "Back stack length: " + mFragmentManager.getBackStackEntryCount());
-
         FragmentTransaction mFragmentTransaction = mFragmentManager.beginTransaction();
         AllRouteSettingsFragment prefs = new AllRouteSettingsFragment();
         mFragmentTransaction.add(android.R.id.content, prefs);
@@ -37,8 +35,6 @@ public class RouteSettingsActivity extends ActionBarActivity {
         mFragmentTransaction.commit();
 
         mFragmentManager.executePendingTransactions();
-
-        Log.d(LOG_TEXT, "Back stack length: " + mFragmentManager.getBackStackEntryCount());
     }
 
     @Override

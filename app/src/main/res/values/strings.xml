@@ -14,8 +14,11 @@
     <string name="hide_acela_trains">Hide Acela trains?</string>
     <string name="hide_acela_trains_summary"></string>
     <string name="add_route_settings">Add Train Route</string>
+    <string name="destroy_route_settings">Destroy Train Route</string>
     <string name="network_connectivity_warning">No Network!</string>
     <string name="retry_button">Retry</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_network_connectivity">NetworkConnectivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

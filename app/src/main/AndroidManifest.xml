@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.tlunter.amtrak.StatusDisplay"
+            android:name=".StatusDisplay"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,9 +21,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.tlunter.amtrak.RouteSettingsActivity"
+            android:name=".RouteSettingsActivity"
             android:label="@string/action_settings"
-            android:parentActivityName="com.tlunter.amtrak.StatusDisplay" >
+            android:parentActivityName=".StatusDisplay" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.tlunter.amtrak.StatusDisplay" />
@@ -31,7 +31,7 @@
         <activity
             android:name=".EditRouteSettingsActivity"
             android:label="@string/add_route_settings"
-            android:parentActivityName="com.tlunter.amtrak.RouteSettingsActivity" >
+            android:parentActivityName=".RouteSettingsActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.tlunter.amtrak.RouteSettingsActivity" />
@@ -49,6 +49,11 @@
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="com.tlunter" />
+
+        <activity
+            android:name=".NetworkConnectivity"
+            android:label="@string/title_activity_network_connectivity" >
+        </activity>
     </application>
 
 </manifest>

@@ -23,7 +23,7 @@ import java.util.List;
  * Created by toddlunter on 12/11/14.
  */
 public class FetchJson extends AsyncTask<String, Void, List<Train>> {
-    private final String LOG_TEXT = "com.tlunter.amtrak.FetchJson";
+    private final String LOG_TEXT = "FetchJson";
     String from;
     String to;
     TrainDrawer callback;
@@ -81,37 +81,39 @@ public class FetchJson extends AsyncTask<String, Void, List<Train>> {
 
     private String downloadStatusPage() {
         BufferedInputStream is = null;
-        String urlString = "http://amtrak.tlunter.com/" + from + "/" + to + ".json";
+        if (from != null && from.length() > 0 && to != null && to.length() > 0) {
+            String urlString = "http://amtrak.tlunter.com/" + from + "/" + to + ".json";
 
-        try {
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(60000);
-            conn.setConnectTimeout(60000);
-            conn.setDoInput(true);
-            conn.connect();
+            try {
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(60000);
+                conn.setConnectTimeout(60000);
+                conn.setDoInput(true);
+                conn.connect();
 
-            is = new BufferedInputStream(conn.getInputStream());
+                is = new BufferedInputStream(conn.getInputStream());
 
-            return readStream(is);
-        } catch (UnknownHostException e) {
-            Log.d(LOG_TEXT, "Unknown host?");
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            Log.d(LOG_TEXT, "Malformed URL: " + urlString);
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            Log.d(LOG_TEXT, "Protocol Error: " + e.getClass().getName());
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.d(LOG_TEXT, "IO Exception: " + e.getClass().getName());
-            e.printStackTrace();
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                return readStream(is);
+            } catch (UnknownHostException e) {
+                Log.d(LOG_TEXT, "Unknown host?");
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                Log.d(LOG_TEXT, "Malformed URL: " + urlString);
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                Log.d(LOG_TEXT, "Protocol Error: " + e.getClass().getName());
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.d(LOG_TEXT, "IO Exception: " + e.getClass().getName());
+                e.printStackTrace();
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
