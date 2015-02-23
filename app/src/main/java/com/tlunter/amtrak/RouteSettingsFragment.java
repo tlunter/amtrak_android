@@ -6,6 +6,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.text.InputType;
 import android.util.Log;
@@ -14,9 +15,16 @@ import android.view.View;
 /**
  * Created by toddlunter on 1/22/15.
  */
-public class EditRouteSettingsFragment extends AbstractRouteSettingsFragment {
-    private final String LOG_TEXT = "com.tlunter.amtrak.EditRouteSettingsFragment";
+public class RouteSettingsFragment extends PreferenceFragment {
+    private final String LOG_TEXT = "RouteSettingsFragment";
     RouteSettings rs;
+
+    protected PreferenceScreen getOrCreatePreferenceScreen() {
+        if (this.getPreferenceScreen() == null) {
+            this.setPreferenceScreen(getPreferenceManager().createPreferenceScreen(getActivity()));
+        }
+        return this.getPreferenceScreen();
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -84,7 +92,12 @@ public class EditRouteSettingsFragment extends AbstractRouteSettingsFragment {
         etp.setKey(key);
         etp.setTitle(title);
         etp.setSummary(summary);
-        etp.setText(defaultText);
+        etp.setText("");
+        if (defaultText != null) {
+            etp.getEditText().setText(defaultText);
+        } else {
+            etp.getEditText().setText("");
+        }
         etp.setOnPreferenceChangeListener(onChangeListener);
         return etp;
     }
@@ -96,6 +109,7 @@ public class EditRouteSettingsFragment extends AbstractRouteSettingsFragment {
         cbp.setKey(key);
         cbp.setTitle(title);
         cbp.setSummary(summary);
+        cbp.setChecked(false);
         if (defaultValue != null) {
             cbp.setChecked(defaultValue);
         } else {
@@ -103,5 +117,36 @@ public class EditRouteSettingsFragment extends AbstractRouteSettingsFragment {
         }
         cbp.setOnPreferenceChangeListener(onChangeListener);
         return cbp;
+    }
+
+    public class RouteSettingsOnChangeListener implements Preference.OnPreferenceChangeListener {
+        private final String LOG_TEXT = "PrefsFragment";
+        RouteSettings rs;
+        RouteSettingsOnChangeListener(RouteSettings rs) {
+            this.rs = rs;
+        }
+
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            Log.d(LOG_TEXT, "Preference " + preference.toString());
+            Log.d(LOG_TEXT, "Key: " + preference.getKey().toString());
+            Log.d(LOG_TEXT, "New object value: " + newValue.toString());
+            if (this.rs.getId() != null) {
+                Log.d(LOG_TEXT, "Current id: " + this.rs.getId().toString());
+            } else {
+                Log.d(LOG_TEXT, "New Record");
+            }
+
+            rs.setSettings(preference.getKey(), newValue);
+            rs.save();
+
+            if (preference instanceof EditTextPreference) {
+                ((EditTextPreference) preference).setText((String)newValue);
+            } else if (preference instanceof CheckBoxPreference) {
+                ((CheckBoxPreference) preference).setChecked((Boolean)newValue);
+            }
+
+            return false;
+        }
     }
 }

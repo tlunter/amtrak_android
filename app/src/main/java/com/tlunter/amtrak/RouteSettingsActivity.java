@@ -2,69 +2,38 @@ package com.tlunter.amtrak;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
-/**
- * Created by toddlunter on 12/30/14.
- */
 public class RouteSettingsActivity extends ActionBarActivity {
-    private final String LOG_TEXT = "TrainsSettings";
-
+    private final String LOG_TEXT = "RouteSettingsActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         LinearLayout linearLayout = new LinearLayout(this);
         setContentView(linearLayout);
-        resetFragment();
-    }
 
-    private void resetFragment() {
         FragmentManager mFragmentManager = getFragmentManager();
-
         FragmentTransaction mFragmentTransaction = mFragmentManager.beginTransaction();
-        AllRouteSettingsFragment prefs = new AllRouteSettingsFragment();
-        mFragmentTransaction.add(android.R.id.content, prefs);
-        mFragmentTransaction.addToBackStack(null);
-        mFragmentTransaction.commit();
-
-        mFragmentManager.executePendingTransactions();
-    }
-
-    @Override
-    public void onBackPressed() {
-        FragmentManager mFragmentManager = getFragmentManager();
-        if (mFragmentManager.getBackStackEntryCount() > 1) {
-            mFragmentManager.popBackStack();
-        } else {
-            super.onBackPressed();
+        RouteSettingsFragment prefs = new RouteSettingsFragment();
+        if (getIntent().getLongExtra("routeSettings", new Long(-1)) > -1) {
+            setTitle("Edit Route Settings");
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        Log.d(LOG_TEXT, "On pause called");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        Log.d(LOG_TEXT, "Resetting fragment");
+        prefs.setArguments(getIntent().getExtras());
+        mFragmentTransaction.replace(android.R.id.content, prefs);
+        mFragmentTransaction.commit();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        if (getIntent().getLongExtra("routeSettings", new Long(-1)) > -1) {
+            getMenuInflater().inflate(R.menu.menu_edit_route_settings, menu);
+        }
         return true;
     }
 
@@ -76,12 +45,13 @@ public class RouteSettingsActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.add_route_settings) {
-            Log.d(LOG_TEXT, "AddRouteSettings clicked");
-            Intent intent = new Intent(this, EditRouteSettingsActivity.class);
-            intent.putExtras(new Bundle());
-            startActivity(intent);
-            return true;
+        if (id == R.id.action_destroy) {
+            Long routeSettingsId = getIntent().getLongExtra("routeSettings", new Long(-1));
+            if (routeSettingsId > -1) {
+                RouteSettings.findById(RouteSettings.class, routeSettingsId).delete();
+                finish();
+                return true;
+            }
         }
 
         return super.onOptionsItemSelected(item);

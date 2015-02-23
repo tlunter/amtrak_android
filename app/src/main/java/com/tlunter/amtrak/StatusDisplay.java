@@ -1,26 +1,20 @@
 package com.tlunter.amtrak;
 
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import java.util.List;
 
 
 public class StatusDisplay extends ActionBarActivity implements ConnectivityTest.ConnectivityTestInterface {
-    private final String LOG_TEXT = "com.tlunter.amtrak.StatusDisplay";
+    private final String LOG_TEXT = "StatusDisplay";
     private ViewPager mViewPager;
     private TrainPagerFragment mTrainPagerFragment;
 
@@ -52,14 +46,14 @@ public class StatusDisplay extends ActionBarActivity implements ConnectivityTest
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             if (mViewPager.getCurrentItem() > -1) {
-                Intent intent = new Intent(this, EditRouteSettingsActivity.class);
+                Intent intent = new Intent(this, RouteSettingsActivity.class);
                 Long routeSettingsId = RouteSettings.listAll(RouteSettings.class).get(mViewPager.getCurrentItem()).getId();
                 intent.putExtra("routeSettings", routeSettingsId);
                 startActivity(intent);
                 return true;
             }
         } else if (id == R.id.action_add_route_settings) {
-            Intent intent = new Intent(this, EditRouteSettingsActivity.class);
+            Intent intent = new Intent(this, RouteSettingsActivity.class);
             intent.putExtras(new Bundle());
             startActivity(intent);
             return true;
@@ -72,9 +66,15 @@ public class StatusDisplay extends ActionBarActivity implements ConnectivityTest
     protected void onResume() {
         super.onResume();
 
+        mTrainPagerFragment.setRouteSettings(RouteSettings.listAll(RouteSettings.class));
         mTrainPagerFragment.notifyDataSetChanged();
 
         ConnectivityTest.test(this, this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     public void testSuccess() {}
@@ -86,15 +86,18 @@ public class StatusDisplay extends ActionBarActivity implements ConnectivityTest
     }
 
     public class TrainPagerFragment extends FragmentStatePagerAdapter {
+        List<RouteSettings> routeSettings;
         public TrainPagerFragment(FragmentManager fm) {
             super(fm);
         }
 
+        public void setRouteSettings(List<RouteSettings> routeSettings) {
+            this.routeSettings = routeSettings;
+        }
+
         @Override
         public Fragment getItem(int position) {
-            List<RouteSettings> rss = RouteSettings.listAll(RouteSettings.class);
-
-            return TrainListingFragment.newInstance(rss.get(position));
+            return TrainListingFragment.newInstance(routeSettings.get(position));
         }
 
         @Override
@@ -104,11 +107,23 @@ public class StatusDisplay extends ActionBarActivity implements ConnectivityTest
 
         @Override
         public CharSequence getPageTitle(int position) {
-            List<RouteSettings> rss = RouteSettings.listAll(RouteSettings.class);
-
-            RouteSettings rs = rss.get(position);
+            RouteSettings rs = routeSettings.get(position);
 
             return rs.toString();
+        }
+
+        @Override
+        public int getItemPosition(Object obj) {
+            TrainListingFragment fragment = (TrainListingFragment)obj;
+            Long recordId = fragment.getArguments().getLong("recordId");
+
+            for (int i = 0; i < routeSettings.size(); i++) {
+                RouteSettings routeSetting = routeSettings.get(i);
+                if (routeSetting.getId().equals(recordId)) {
+                    return i;
+                }
+            }
+            return POSITION_NONE;
         }
     }
 }
