@@ -1,12 +1,13 @@
 package com.tlunter.amtrak;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.View;
 
 
-public class NetworkConnectivity extends ActionBarActivity implements ConnectivityTest.ConnectivityTestInterface {
+public class NetworkConnectivity extends Activity implements ConnectivityTest.ConnectivityTestInterface {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

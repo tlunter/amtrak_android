@@ -120,6 +120,7 @@ public class StatusDisplay extends ActionBarActivity implements ConnectivityTest
             for (int i = 0; i < routeSettings.size(); i++) {
                 RouteSettings routeSetting = routeSettings.get(i);
                 if (routeSetting.getId().equals(recordId)) {
+                    fragment.redraw();
                     return i;
                 }
             }

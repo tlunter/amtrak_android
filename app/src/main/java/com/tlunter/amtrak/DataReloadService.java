@@ -1,9 +1,10 @@
 package com.tlunter.amtrak;
 
+import android.os.Handler;
 import android.util.Log;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by toddlunter on 12/15/14.
@@ -12,28 +13,34 @@ public class DataReloadService {
     private final String LOG_TEXT = "DataReloadService";
     RouteSettings preferences;
     TrainDrawer callback;
-    ScheduledThreadPoolExecutor executor;
+    Handler handler;
+    TimerTask task;
 
     public DataReloadService(RouteSettings routeSettings, TrainDrawer callback) {
         this.preferences = routeSettings;
         this.callback = callback;
+        this.handler = new Handler();
     }
 
     public void start() {
-        executor = new ScheduledThreadPoolExecutor(1);
-        executor.scheduleAtFixedRate(new FetchJsonRunnable(preferences.fromStation, preferences.toStation, callback), 0, 30, TimeUnit.SECONDS);
+        Timer timer = TimerSingleton.instance();
+        this.task = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new FetchJsonRunnable(preferences.fromStation, preferences.toStation, callback));
+            }
+        };
+        timer.schedule(this.task, 0, 45000);
     }
 
     public void end() {
-        executor.shutdownNow();
+        if (this.task != null) {
+            this.task.cancel();
+        }
     }
 
     public boolean isRunning() {
-        if (executor != null) {
-            return !(executor.isTerminated() || executor.isTerminated() || executor.isShutdown());
-        } else {
-            return false;
-        }
+        return this.task != null;
     }
 
     private class FetchJsonRunnable implements Runnable {
