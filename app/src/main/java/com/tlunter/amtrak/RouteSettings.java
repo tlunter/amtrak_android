@@ -40,11 +40,17 @@ public class RouteSettings extends SugarRecord<RouteSettings> {
             str.append(" - " + preferredTrainNumber.toString());
         }
         if (hideAcela != null) {
-            if (hideAcela) {
-                str.append(" - Hidden Acela");
+            if (hideAcela == false) {
+                str.append(" (With Acela)");
             }
         }
         return str.toString();
+    }
+
+    public Boolean getHideAcela() {
+        if (hideAcela == null)
+            return false;
+        return hideAcela;
     }
 
     public void setSettings(String key, Object newValue) {

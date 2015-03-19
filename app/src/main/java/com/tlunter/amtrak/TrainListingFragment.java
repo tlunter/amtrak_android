@@ -63,14 +63,19 @@ public class TrainListingFragment extends Fragment implements TrainDrawer {
         View rootView = inflater.inflate(R.layout.fragment_train_listing, container, false);
         this.trainTable = (TableLayout)rootView.findViewById(R.id.trainTable);
 
-        Log.d(LOG_TEXT, "Display: " + routeSettings.toString());
-
         return rootView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        if (getArguments() != null) {
+            Long recordId = getArguments().getLong("recordId");
+            routeSettings = RouteSettings.findById(RouteSettings.class, recordId);
+        }
+
+        redraw();
 
         endDataReloadService();
         dataReloadService = new DataReloadService(routeSettings, this);
@@ -131,7 +136,9 @@ public class TrainListingFragment extends Fragment implements TrainDrawer {
 
     private void drawAllTrains(List<Train> trains) {
         for (Train t : trains) {
-            trainTable.addView(buildTableRow(t));
+            if (t.getAcela() == false || routeSettings.getHideAcela() == false) {
+                trainTable.addView(buildTableRow(t));
+            }
         }
     }
 

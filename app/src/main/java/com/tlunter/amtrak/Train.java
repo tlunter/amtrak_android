@@ -44,7 +44,11 @@ public class Train {
         this.estimated = estimated;
     }
 
-    public Boolean getAcela() { return acela; }
+    public Boolean getAcela() {
+        if (acela == null)
+            return false;
+        return acela;
+    }
 
     public void setAcela(Boolean acela) { this.acela = acela; }
 
