@@ -6,10 +6,10 @@
         android:title="@string/action_settings"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@android:drawable/ic_menu_preferences"/>
+        android:icon="@drawable/ic_settings"/>
     <item android:id="@+id/action_add_route_settings"
         android:title="@string/add_route_settings"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@android:drawable/ic_menu_add"/>
+        android:icon="@drawable/ic_add"/>
 </menu>

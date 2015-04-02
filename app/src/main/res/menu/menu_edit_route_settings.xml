@@ -5,5 +5,5 @@
         android:title="@string/destroy_route_settings"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@android:drawable/ic_menu_delete"/>
+        android:icon="@drawable/ic_delete"/>
 </menu>
