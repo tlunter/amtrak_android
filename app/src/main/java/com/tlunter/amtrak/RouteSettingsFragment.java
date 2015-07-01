@@ -91,12 +91,16 @@ public class RouteSettingsFragment extends PreferenceFragment {
         EditTextPreference etp = new EditTextPreference(getActivity());
         etp.setKey(key);
         etp.setTitle(title);
-        etp.setSummary(summary);
-        etp.setText("");
+        etp.setPersistent(false);
         if (defaultText != null) {
-            etp.getEditText().setText(defaultText);
+            etp.setSummary(defaultText);
         } else {
-            etp.getEditText().setText("");
+            etp.setSummary(summary);
+        }
+        if (defaultText != null) {
+            etp.setText(defaultText);
+        } else {
+            etp.setText("");
         }
         etp.setOnPreferenceChangeListener(onChangeListener);
         return etp;
@@ -108,6 +112,7 @@ public class RouteSettingsFragment extends PreferenceFragment {
         CheckBoxPreference cbp = new CheckBoxPreference(getActivity());
         cbp.setKey(key);
         cbp.setTitle(title);
+        cbp.setPersistent(false);
         cbp.setSummary(summary);
         cbp.setChecked(false);
         if (defaultValue != null) {
