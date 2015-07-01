@@ -33,6 +33,12 @@ public class DataReloadService {
         timer.schedule(this.task, 0, 45000);
     }
 
+    public void runNow() {
+        if (this.task != null) {
+            this.task.run();
+        }
+    }
+
     public void end() {
         if (this.task != null) {
             this.task.cancel();

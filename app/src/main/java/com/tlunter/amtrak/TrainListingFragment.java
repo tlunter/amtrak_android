@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,13 +28,14 @@ import java.util.List;
  * Use the {@link TrainListingFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TrainListingFragment extends Fragment implements TrainDrawer {
+public class TrainListingFragment extends Fragment implements TrainDrawer, SwipeRefreshLayout.OnRefreshListener {
     private final String LOG_TEXT = "TrainListingFragment";
 
     private RouteSettings routeSettings;
     private DataReloadService dataReloadService;
     private List<Train> trains;
     private TableLayout trainTable;
+    private SwipeRefreshLayout swipeLayout;
     private FrameLayout progressBar;
 
     public static TrainListingFragment newInstance(RouteSettings rs) {
@@ -62,8 +65,15 @@ public class TrainListingFragment extends Fragment implements TrainDrawer {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_train_listing, container, false);
         this.trainTable = (TableLayout)rootView.findViewById(R.id.trainTable);
+        this.swipeLayout = (SwipeRefreshLayout)rootView.findViewById(R.id.swipe_container);
+        this.swipeLayout.setOnRefreshListener(this);
 
         return rootView;
+    }
+
+    @Override
+    public void onRefresh() {
+        dataReloadService.runNow();
     }
 
     @Override
@@ -103,9 +113,8 @@ public class TrainListingFragment extends Fragment implements TrainDrawer {
     public void drawLoading() {
         Log.d(LOG_TEXT, "Getting trains for " + routeSettings.toString());
         if (getActivity() != null) {
-            progressBar = (FrameLayout)getView().findViewById(R.id.progressBarHolder);
-            progressBar.setVisibility(View.VISIBLE);
             Log.d(LOG_TEXT, "Drawing progress bar");
+            this.swipeLayout.setRefreshing(true);
         } else {
             Log.d(LOG_TEXT, "Get activity is null");
         }
@@ -119,9 +128,8 @@ public class TrainListingFragment extends Fragment implements TrainDrawer {
         this.trains = trains;
 
         if (getActivity() != null) {
-            progressBar = (FrameLayout)getView().findViewById(R.id.progressBarHolder);
-            progressBar.setVisibility(View.GONE);
             Log.d(LOG_TEXT, "Removing progress bar");
+            this.swipeLayout.setRefreshing(false);
             redraw();
         } else {
             Log.d(LOG_TEXT, "Get activity is null");
