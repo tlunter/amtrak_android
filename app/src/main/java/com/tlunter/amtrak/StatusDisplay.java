@@ -37,6 +37,13 @@ public class StatusDisplay extends ActionBarActivity implements ConnectivityTest
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem settings = menu.findItem(R.id.action_settings);
+        settings.setVisible(mTrainPagerFragment.getCount() > 0);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -68,6 +75,7 @@ public class StatusDisplay extends ActionBarActivity implements ConnectivityTest
 
         mTrainPagerFragment.setRouteSettings(RouteSettings.listAll(RouteSettings.class));
         mTrainPagerFragment.notifyDataSetChanged();
+        invalidateOptionsMenu();
 
         ConnectivityTest.test(this, this);
     }
