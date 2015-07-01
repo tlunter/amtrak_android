@@ -135,6 +135,7 @@ public class TrainListingFragment extends Fragment implements TrainDrawer {
     }
 
     private void drawAllTrains(List<Train> trains) {
+        trainTable.addView(buildHeaderRow());
         for (Train t : trains) {
             if (t.getAcela() == false || routeSettings.getHideAcela() == false) {
                 trainTable.addView(buildTableRow(t));
@@ -142,12 +143,21 @@ public class TrainListingFragment extends Fragment implements TrainDrawer {
         }
     }
 
-
-    private TableRow buildTableRow(Train train) {
-        return buildTableRow(train, 255);
+    private TableRow buildHeaderRow() {
+        TableRow trainLayout = new TableRow(getActivity());
+        TableRow.LayoutParams layout = new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT
+        );
+        trainLayout.setLayoutParams(layout);
+        trainLayout.addView(buildTextView("Train", true, 2));
+        trainLayout.addView(buildTextView("Scheduled", true));
+        trainLayout.addView(buildTextView("Estimated", true));
+        trainLayout.setGravity(Gravity.CENTER_HORIZONTAL);
+        return trainLayout;
     }
 
-    private TableRow buildTableRow(Train train, int alpha) {
+    private TableRow buildTableRow(Train train) {
         TableRow trainLayout = new TableRow(getActivity());
         TableRow.LayoutParams layout = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
@@ -160,44 +170,40 @@ public class TrainListingFragment extends Fragment implements TrainDrawer {
             }
         }
         trainLayout.setLayoutParams(layout);
-        trainLayout.addView(buildNumberView(train, alpha));
-        trainLayout.addView(buildTimeView(train, alpha));
+        trainLayout.addView(buildTextView(train.getNumber().toString(), false, 2));
+        trainLayout.addView(buildTextView(train.getScheduled()));
+        trainLayout.addView(buildTextView(train.getEstimated()));
+        trainLayout.setGravity(Gravity.CENTER_HORIZONTAL);
         return trainLayout;
     }
 
-    private TextView buildNumberView(Train train, int alpha) {
-        TextView numberView = buildTextView(train.getNumber().toString(), alpha);
-        numberView.setGravity(Gravity.RIGHT);
-        TableRow.LayoutParams layout = new TableRow.LayoutParams(
-                0,
-                TableRow.LayoutParams.WRAP_CONTENT,
-                3.0f
-        );
-        numberView.setLayoutParams(layout);
-        return numberView;
+    private TextView buildTextView(String text) {
+        return buildTextView(text, false);
     }
 
-    private TextView buildTimeView(Train train, int alpha) {
-        if (train.getEstimated().isEmpty()) {
-            return buildTextView(train.getScheduled(), alpha);
-        }
-        return buildTextView(train.getEstimated(), alpha);
+    private TextView buildTextView(String text, boolean bold) {
+        return buildTextView(text, bold, 3);
     }
 
-    private TextView buildTextView(String text, int alpha) {
+    private TextView buildTextView(String text, boolean bold, int width) {
         TextView textView = new TextView(getActivity());
         TableRow.LayoutParams layout = new TableRow.LayoutParams(
                 0,
                 TableRow.LayoutParams.WRAP_CONTENT,
-                4.0f
+                width
         );
         textView.setPadding(30, 5, 30, 5);
         textView.setLayoutParams(layout);
-        textView.setTextSize(40);
-        textView.setTextColor(Color.argb(alpha, 0, 0, 0));
+        textView.setTextSize(20);
+        textView.setTextColor(Color.rgb(0, 0, 0));
         textView.setText(text);
-        Typeface openSans = Typeface.createFromAsset(getActivity().getAssets(), "fonts/OpenSans/OpenSans-Light.ttf");
-        textView.setTypeface(openSans);
+        if (bold) {
+            Typeface openSansBold = Typeface.createFromAsset(getActivity().getAssets(), "fonts/OpenSans/OpenSans-Semibold.ttf");
+            textView.setTypeface(openSansBold);
+        } else {
+            Typeface openSansLight = Typeface.createFromAsset(getActivity().getAssets(), "fonts/OpenSans/OpenSans-Light.ttf");
+            textView.setTypeface(openSansLight);
+        }
 
         return textView;
     }
